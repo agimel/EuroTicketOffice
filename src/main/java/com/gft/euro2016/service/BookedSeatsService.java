@@ -7,9 +7,9 @@ import com.gft.euro2016.domain.BookedSeat;
 
 public interface BookedSeatsService {
 
-	List<BookedSeat> findBookedSeats(Long match_id);
+	List<BookedSeat> findBookedSeats(Long matchId);
 
-	List<Long> findBookedSeatsIDs(Long match_id);
+	List<Long> findBookedSeatsIDs(Long matchId);
 
 	BookedSeat bookSeat(BookedSeat seat);
 	

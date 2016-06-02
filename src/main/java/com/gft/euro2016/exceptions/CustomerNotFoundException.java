@@ -6,6 +6,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(value=HttpStatus.NOT_FOUND, reason="Customer Not Found") //404
 public class CustomerNotFoundException extends Exception {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public CustomerNotFoundException(long id) {
 		super("Customer not found with id: " + id);
 		

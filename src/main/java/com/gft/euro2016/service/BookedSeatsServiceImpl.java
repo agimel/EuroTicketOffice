@@ -23,27 +23,27 @@ public class BookedSeatsServiceImpl implements BookedSeatsService {
 	
 
 	@Override
-	public List<BookedSeat> findBookedSeats(Long match_id){
-		Match match = matchRepo.findOne(match_id);
-		List<BookedSeat> booked_seats = new ArrayList<>();
+	public List<BookedSeat> findBookedSeats(Long matchId){
+		Match match = matchRepo.findOne(matchId);
+		List<BookedSeat> bookedSeats = new ArrayList<>();
 		if(match != null){
-			booked_seats = bookedSeatsRepo.findByMatch(match);
+			bookedSeats = bookedSeatsRepo.findByMatch(match);
 		}
 
-		return booked_seats;
+		return bookedSeats;
 	}
 	
 	@Override
-	public List<Long> findBookedSeatsIDs(Long match_id){
+	public List<Long> findBookedSeatsIDs(Long matchId){
 
-		List<Long> seat_ids = new ArrayList<>();
+		List<Long> seatIds = new ArrayList<>();
 		List<BookedSeat> seats = new ArrayList<>();
-		seats = findBookedSeats(match_id);
+		seats = findBookedSeats(matchId);
 		
 		if(seats != null && !seats.isEmpty()){
-			seat_ids = seats.stream().map(e -> e.getSeat()).map(e -> e.getId()).collect(Collectors.toList());
+			seatIds = seats.stream().map(e -> e.getSeat()).map(e -> e.getId()).collect(Collectors.toList());
 		}
-		return seat_ids;
+		return seatIds;
 	}
 	
 	public BookedSeat bookSeat(BookedSeat seat){

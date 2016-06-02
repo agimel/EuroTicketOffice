@@ -1,10 +1,11 @@
 package com.gft.euro2016.test.controllers;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -17,12 +18,9 @@ import java.util.Calendar;
 import java.util.Date;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockitoAnnotations;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.MediaType;
@@ -38,6 +36,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.gft.euro2016.Euro2016TicketOfficeApplication;
 import com.gft.euro2016.domain.Match;
+import com.gft.euro2016.domain.Seat;
 import com.gft.euro2016.domain.Stadium;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -69,8 +68,6 @@ public class BookingControllerTest {
 	public void setup(){
 		this.mockMvc = webAppContextSetup(webApplicationContext).build();	
 		MockitoAnnotations.initMocks(this);
-        session.clearAttributes();
-        session.invalidate();
 	}
 	
     protected String toJson(Object o) throws IOException {
@@ -90,7 +87,7 @@ public class BookingControllerTest {
     public void chooseSeatTest() throws Exception{
 
     	String seatJson = "{\"id\":1,\"row_nr\":1,\"col_nr\":10,\"price\":100.0}";
-    	this.mockMvc.perform(post("/api/match/2/seats" ).contentType(contentType).content(seatJson)).andExpect(redirectedUrl("http://localhost:8080/api/match/2/book?seat=1")).andDo(MockMvcResultHandlers.print());
+    	this.mockMvc.perform(post("/api/match/{id}/seats", 2 ).contentType(contentType).content(seatJson)).andExpect(redirectedUrl("http://localhost:8080/api/match/2/book?seat=1")).andDo(MockMvcResultHandlers.print());
     }
   
     @Test
@@ -108,7 +105,7 @@ public class BookingControllerTest {
    
     @Test
     public void getAvailableSeatsTest()throws Exception{
-    	this.mockMvc.perform(get("/api/match/2/seats" ).contentType(contentType)).andExpect(status().is2xxSuccessful()).andDo(MockMvcResultHandlers.print());
+    	this.mockMvc.perform(get("/api/match/{id}/seats", 2).contentType(contentType)).andExpect(status().is2xxSuccessful()).andDo(MockMvcResultHandlers.print());
     }
     
 
@@ -120,18 +117,54 @@ public class BookingControllerTest {
 		c.set(2016, 6, 10);
 		Date d = c.getTime();
 		
+		Match m = new Match(1, d, 200,s );
+		
+    	String matchJson = toJson(m);
+    	String seatJson = toJson(new Seat(1, 10, 100.00));
+
+    	this.mockMvc.perform(post("/api/match/choose" ).contentType(contentType).session(session).content(matchJson)).andExpect(status().is2xxSuccessful());
+    	this.mockMvc.perform(post("/api/match/{match_id}/seats", 1).contentType(contentType).session(session).content(seatJson)).andExpect(status().is2xxSuccessful());
+    	this.mockMvc.perform(post("/api/match/{match_id}/book?seat=1&cid=1", 1).contentType(contentType).session(session)).andExpect(status().is2xxSuccessful());
+    }
+    
+    @Test
+    public void bookMatchTest_NoSeatsChosen() throws Exception{
+    	
+    	Stadium s =  new Stadium("Parc des Princes", "Paris");
+    	Calendar c = Calendar.getInstance();
+		c.set(2016, 6, 10);
+		Date d = c.getTime();
+		
 		Match m = new Match(1, d, 100,s );
 		
     	String matchJson = toJson(m);
 
-    	this.mockMvc.perform(post("/api/match/choose" ).contentType(contentType).content(matchJson).session(session)).andExpect(status().is2xxSuccessful());
-    	this.mockMvc.perform(post("/api/match/1/book?seat=1&cid=1").contentType(contentType).session(session)).andExpect(status().is2xxSuccessful());
-
+    	this.mockMvc.perform(post("/api/match/choose" ).contentType(contentType).content(matchJson)).andExpect(status().is2xxSuccessful());
+    	this.mockMvc.perform(post("/api/match/{match_id}/book?seat=1&cid=1", 1).contentType(contentType)).andExpect(status().is4xxClientError());
+    	
+    }
+    
+    @Test
+    public void bookMatchTest_NotSaved() throws Exception{
+    	
+    	Stadium s =  new Stadium("Parc des Princes", "Paris");
+    	Calendar c = Calendar.getInstance();
+		c.set(2016, 6, 11);
+		Date d = c.getTime();
+		
+		Match m = new Match(1, d, 200,s );
+		
+    	String matchJson = toJson(m);
+    	String seatJson = toJson(new Seat(2, 20, 200.00));
+    	
+    	this.mockMvc.perform(post("/api/match/choose" ).contentType(contentType).content(matchJson)).andExpect(status().is2xxSuccessful());
+    	this.mockMvc.perform(post("/api/match/{match_id}/seats", 2).contentType(contentType).session(session).content(seatJson)).andExpect(status().is2xxSuccessful());
+    	this.mockMvc.perform(get("/api/bookings").contentType(contentType)).andExpect(jsonPath("$", hasSize(2)));
     }
     
     @Test
     public void getReservationsTest() throws Exception{
-    	this.mockMvc.perform(get("/api/bookings").contentType(contentType)).andExpect(status().is2xxSuccessful()).andExpect(content().string(containsString("[{\"id\":1,\"customer\":{\"id\":1,\"firstName\":\"Anna\",\"lastName\":\"Gimel\",\"email\":\"anna.gimel@gft.com\"")));
+    	this.mockMvc.perform(get("/api/bookings").contentType(contentType)).andExpect(status().is2xxSuccessful()).andExpect(content().string(containsString("[{\"id\":1,\"customer\":{\"id\":1,\"firstName\":\"Anna\",\"lastName\":\"Gimel\",\"email\":\"anna.gimel@gft.com\""))).andDo(MockMvcResultHandlers.print());
    }
 
 

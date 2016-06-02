@@ -15,7 +15,7 @@ public class Euro2016TicketOfficeApplication {
 	
 	public static void main(String[] args) {
 		ApplicationContext ctx = SpringApplication.run(Euro2016TicketOfficeApplication.class, args);
-		
+		log.info(ctx.getDisplayName());
 		
 
 	}

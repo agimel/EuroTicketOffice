@@ -93,6 +93,8 @@ public class DatabaseLoader implements ApplicationListener<ContextRefreshedEvent
 		log.info("Save seats");
 		
 		Reservation reservation = new Reservation(customer, match, 100);
+		reservation.setCustomer(customer);
+		reservation.setMatch(match);
 		reservationRepo.save(reservation);
 		
 		BookedSeat bookedSeat = new BookedSeat(match, seats.get(1), reservation);

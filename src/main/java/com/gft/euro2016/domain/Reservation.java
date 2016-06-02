@@ -11,15 +11,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
-import org.springframework.stereotype.Component;
-import org.springframework.web.context.WebApplicationContext;
 
 @Entity
-@Component
-@Scope(value=WebApplicationContext.SCOPE_SESSION, proxyMode=ScopedProxyMode.TARGET_CLASS)
-public class Reservation {
+public class Reservation{
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)

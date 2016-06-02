@@ -7,5 +7,5 @@ public interface CustomerService {
 	void deleteCustomer(Long id);
 	Customer addCustomer(String firstName, String lastName, String email);
 	Customer addCustomer(Customer customer);
-	Customer findCustomerById(long customer_id);
+	Customer findCustomerById(long customerId);
 }

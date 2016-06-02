@@ -37,18 +37,18 @@ public class CustomerController {
 		return new ResponseEntity<>(result, httpHeaders, HttpStatus.CREATED);
 	}
 	
-	@RequestMapping(value="/{customer_id}", method=RequestMethod.DELETE)
-	public ResponseEntity<?> deleteCustomer(@PathVariable long customer_id){
-		customerService.deleteCustomer(customer_id);
+	@RequestMapping(value="/{customerId}", method=RequestMethod.DELETE)
+	public ResponseEntity<?> deleteCustomer(@PathVariable long customerId){
+		customerService.deleteCustomer(customerId);
 		HttpHeaders httpHeaders = new HttpHeaders();
 		return new ResponseEntity<>(null, httpHeaders, HttpStatus.OK);
 	}
 	
-	@RequestMapping(value="/{customer_id}")
-	public Customer getCustomer(@PathVariable long customer_id) throws CustomerNotFoundException{
-		Customer customer = customerService.findCustomerById(customer_id);
+	@RequestMapping(value="/{customerId}")
+	public Customer getCustomer(@PathVariable long customerId) throws CustomerNotFoundException{
+		Customer customer = customerService.findCustomerById(customerId);
 		if(customer == null){
-			throw new CustomerNotFoundException(customer_id);
+			throw new CustomerNotFoundException(customerId);
 		}
 		return customer;
 	}
